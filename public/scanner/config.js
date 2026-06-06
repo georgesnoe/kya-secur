@@ -10,7 +10,7 @@
 
 window.APP_CONFIG = {
     // Adresse de base du backend (Kya Secur)
-    API_BASE: "http://192.168.1.124:3000",
+    API_BASE: "https://kya-secur.vercel.app",
 
     // URL du backend pour valider le QR code
     QR_ENDPOINT: "/api/scan/qr",
