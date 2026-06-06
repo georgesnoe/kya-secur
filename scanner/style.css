@@ -1,0 +1,298 @@
+:root {
+    --bg: #000000;
+    --panel: #0c0c0c;
+    --line: #1d1d1d;
+    --green: #16c47f;
+    --red: #ff3b3b;
+    --text: #f2f2f2;
+    --muted: #8a8a8a;
+    --accent: #16c47f;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.app {
+    width: 100%;
+    max-width: 480px;
+    padding: 28px 20px 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+}
+
+.app-header {
+    text-align: center;
+}
+
+#title {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.subtitle {
+    color: var(--muted);
+    font-size: 14px;
+    margin-top: 6px;
+}
+
+/* Étapes */
+.steps {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    justify-content: center;
+}
+
+.step {
+    font-size: 12px;
+    color: var(--muted);
+    padding: 6px 14px;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+
+.step.active {
+    color: #000;
+    background: var(--accent);
+    border-color: var(--accent);
+    font-weight: 600;
+}
+
+.step.done {
+    color: var(--green);
+    border-color: var(--green);
+}
+
+/* Stages */
+.stage {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+}
+
+.stage.active {
+    display: flex;
+    animation: fadeIn 0.4s ease;
+}
+
+/* Cadre scanner */
+.scanner-frame {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    max-width: 86vw;
+    max-height: 86vw;
+    background: var(--panel);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 0 0 1px var(--line), 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.scanner-frame.round {
+    border-radius: 50%;
+}
+
+.reader {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#qr-reader video {
+    object-fit: cover !important;
+}
+
+/* Coins décoratifs */
+.corner {
+    position: absolute;
+    width: 34px;
+    height: 34px;
+    border: 3px solid var(--accent);
+    z-index: 3;
+}
+.corner.tl { top: 12px; left: 12px; border-right: none; border-bottom: none; border-radius: 8px 0 0 0; }
+.corner.tr { top: 12px; right: 12px; border-left: none; border-bottom: none; border-radius: 0 8px 0 0; }
+.corner.bl { bottom: 12px; left: 12px; border-right: none; border-top: none; border-radius: 0 0 0 8px; }
+.corner.br { bottom: 12px; right: 12px; border-left: none; border-top: none; border-radius: 0 0 8px 0; }
+
+/* Ligne de scan animée */
+.scan-line {
+    position: absolute;
+    left: 8%;
+    right: 8%;
+    height: 2px;
+    top: 0;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    box-shadow: 0 0 12px var(--accent);
+    z-index: 2;
+    animation: scanMove 2.2s ease-in-out infinite;
+}
+
+.face-guide {
+    position: absolute;
+    inset: 16%;
+    border: 2px dashed rgba(22, 196, 127, 0.55);
+    border-radius: 50%;
+    z-index: 2;
+}
+
+.hint {
+    color: var(--muted);
+    font-size: 13px;
+    text-align: center;
+}
+
+/* Boutons */
+.btn {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 14px 26px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.15s ease, opacity 0.2s ease;
+}
+
+.btn:active {
+    transform: scale(0.96);
+}
+
+.btn.ghost {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--line);
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Barre d'outils du scanner */
+.tools {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.tool-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid var(--line);
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: border-color 0.2s ease, transform 0.15s ease;
+}
+
+.tool-btn:active {
+    transform: scale(0.95);
+}
+
+.tool-btn.on {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.tool-ico {
+    font-size: 16px;
+    line-height: 1;
+}
+
+/* Overlay résultat */
+.result-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.92);
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 22px;
+    z-index: 50;
+}
+
+.result-overlay.show {
+    display: flex;
+    animation: fadeIn 0.25s ease;
+}
+
+.result-icon svg {
+    width: 130px;
+    height: 130px;
+    display: none;
+}
+
+.result-overlay.success .icon-check { display: block; }
+.result-overlay.error .icon-cross { display: block; }
+
+.icon-check circle { stroke: var(--green); stroke-width: 2.5; }
+.icon-check path { stroke: var(--green); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.icon-cross circle { stroke: var(--red); stroke-width: 2.5; }
+.icon-cross path { stroke: var(--red); stroke-width: 4; stroke-linecap: round; }
+
+.result-overlay.show svg circle {
+    stroke-dasharray: 160;
+    stroke-dashoffset: 160;
+    animation: draw 0.5s ease forwards;
+}
+.result-overlay.show svg path {
+    stroke-dasharray: 80;
+    stroke-dashoffset: 80;
+    animation: draw 0.4s 0.35s ease forwards;
+}
+
+.result-text {
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.result-overlay.success .result-text { color: var(--green); }
+.result-overlay.error .result-text { color: var(--red); }
+
+/* Animations */
+@keyframes scanMove {
+    0% { top: 6%; }
+    50% { top: 92%; }
+    100% { top: 6%; }
+}
+
+@keyframes draw {
+    to { stroke-dashoffset: 0; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}

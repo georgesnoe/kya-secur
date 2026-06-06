@@ -5,4 +5,4 @@ export const openai = new OpenAI({
     baseURL: process.env.OPENAI_BASE_URL || undefined,
 });
 
-export const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-4o";
+export const OPENAI_MODEL = process.env.OPENAI_MODEL as string;

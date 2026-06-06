@@ -38,6 +38,24 @@ interface User {
     qrcode: string | null;
     faceImage: string | null;
     createdAt: string;
+    scanEnabled: boolean;
+}
+
+const API = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+
+function api(path: string) {
+    return `${API}${path}`;
+}
+
+async function fetchWithTimeout(input: RequestInfo, init?: RequestInit, timeoutMs = 15000) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+        const res = await fetch(input, { ...init, signal: controller.signal });
+        return res;
+    } finally {
+        clearTimeout(timer);
+    }
 }
 
 export default function UsersPage() {
@@ -51,11 +69,12 @@ export default function UsersPage() {
     const fetchUsers = async () => {
         setLoading(true);
         try {
-            const res = await fetch("/api/users");
+            const res = await fetchWithTimeout(api("/api/users"));
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
             setUsers(data.users ?? []);
         } catch {
-            toast.error("Failed to load users");
+            toast.error("Erreur lors du chargement des utilisateurs");
         } finally {
             setLoading(false);
         }
@@ -69,14 +88,14 @@ export default function UsersPage() {
         if (!deleteId) return;
         setDeleting(true);
         try {
-            const res = await fetch(`/api/users/${deleteId}`, {
+            const res = await fetchWithTimeout(api(`/api/users/${deleteId}`), {
                 method: "DELETE",
             });
             if (!res.ok) throw new Error("Failed to delete");
-            toast.success("User deleted");
+            toast.success("Utilisateur supprimé");
             setUsers((prev) => prev.filter((u) => u.id !== deleteId));
         } catch {
-            toast.error("Failed to delete user");
+            toast.error("Erreur lors de la suppression");
         } finally {
             setDeleting(false);
             setDeleteId(null);
@@ -110,33 +129,33 @@ export default function UsersPage() {
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                     <div>
-                        <CardTitle>Users</CardTitle>
+                        <CardTitle>Utilisateurs</CardTitle>
                         <CardDescription>
-                            Manage all registered users in the system.
+                            Gérer tous les utilisateurs enregistrés dans le système.
                         </CardDescription>
                     </div>
-                    <Button render={<Link href="/dashboard/users/new" />}>
-                        Add User
+                    <Button nativeButton={false} render={<Link href="/dashboard/users/new" />}>
+                        Ajouter
                     </Button>
                 </CardHeader>
                 <CardContent>
                     {loading ? (
                         <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
-                            Loading users…
+                            Chargement des utilisateurs…
                         </div>
                     ) : users.length === 0 ? (
                         <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
-                            No users found. Create your first user!
+                            Aucun utilisateur trouvé. Créez votre premier utilisateur !
                         </div>
                     ) : (
                         <Table>
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Avatar</TableHead>
-                                    <TableHead>Name</TableHead>
+                                    <TableHead>Nom</TableHead>
                                     <TableHead>Email</TableHead>
-                                    <TableHead>Role</TableHead>
-                                    <TableHead>QR Code</TableHead>
+                                    <TableHead>Rôle</TableHead>
+                                    <TableHead>Code QR</TableHead>
                                     <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -145,7 +164,7 @@ export default function UsersPage() {
                                     <TableRow key={user.id}>
                                         <TableCell>
                                             <Avatar className="size-8">
-                                                <AvatarImage src={user.faceImage ?? undefined} />
+                                                <AvatarImage src={`/api/users/${user.id}/face`} />
                                                 <AvatarFallback>
                                                     {user.name.charAt(0).toUpperCase()}
                                                 </AvatarFallback>
@@ -187,16 +206,17 @@ export default function UsersPage() {
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
+                                                    nativeButton={false}
                                                     render={<Link href={`/dashboard/users/${user.id}`} />}
                                                 >
-                                                    Edit
+                                                    Modifier
                                                 </Button>
                                                 <Button
                                                     variant="destructive"
                                                     size="sm"
                                                     onClick={() => setDeleteId(user.id)}
                                                 >
-                                                    Delete
+                                                    Supprimer
                                                 </Button>
                                             </div>
                                         </TableCell>
@@ -214,10 +234,9 @@ export default function UsersPage() {
             >
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Delete user</DialogTitle>
+                        <DialogTitle>Supprimer l'utilisateur</DialogTitle>
                         <DialogDescription>
-                            Are you sure you want to delete this user? This action cannot be
-                            undone.
+                            Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
@@ -226,14 +245,14 @@ export default function UsersPage() {
                             onClick={() => setDeleteId(null)}
                             disabled={deleting}
                         >
-                            Cancel
+                            Annuler
                         </Button>
                         <Button
                             variant="destructive"
                             onClick={handleDelete}
                             disabled={deleting}
                         >
-                            {deleting ? "Deleting…" : "Delete"}
+                            {deleting ? "Suppression…" : "Supprimer"}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -248,7 +267,7 @@ export default function UsersPage() {
                     <DialogHeader>
                         <DialogTitle>{qrUser?.name}</DialogTitle>
                         <DialogDescription>
-                            Scan this QR code to identify the user.
+                            Scannez ce code QR pour identifier l'utilisateur.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="flex justify-center py-4">
@@ -267,7 +286,7 @@ export default function UsersPage() {
                     </div>
                     <DialogFooter className="sm:justify-center">
                         <Button variant="outline" onClick={() => setQrUser(null)}>
-                            Close
+                            Fermer
                         </Button>
                         <Button onClick={handleDownloadQR}>Download PNG</Button>
                     </DialogFooter>

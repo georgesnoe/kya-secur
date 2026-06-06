@@ -17,7 +17,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { name, email, role, faceImage } = body;
+        const { name, email, role, faceImage, scanEnabled } = body;
 
         if (!name || !email) {
             return NextResponse.json({ error: "Name and email are required" }, { status: 400 });
@@ -34,6 +34,7 @@ export async function POST(request: NextRequest) {
                 role: role || "user",
                 qrcode,
                 faceImage: faceImage || null,
+                scanEnabled: scanEnabled !== undefined ? scanEnabled : true,
             })
             .returning();
 

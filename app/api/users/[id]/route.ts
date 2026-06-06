@@ -34,7 +34,7 @@ export async function PUT(
     try {
         const { id } = await params;
         const body = await request.json();
-        const { name, email, role, faceImage } = body;
+        const { name, email, role, faceImage, scanEnabled } = body;
 
         const existingUser = await db
             .select()
@@ -54,6 +54,7 @@ export async function PUT(
                 ...(email !== undefined && { email }),
                 ...(role !== undefined && { role }),
                 ...(faceImage !== undefined && { faceImage }),
+                ...(scanEnabled !== undefined && { scanEnabled }),
             })
             .where(eq(user.id, id))
             .returning();

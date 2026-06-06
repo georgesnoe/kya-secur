@@ -12,6 +12,7 @@ export const user = pgTable(
     role: text("role").default("user").notNull(),
     qrcode: text("qrcode").unique(),
     faceImage: text("face_image"),
+    scanEnabled: boolean("scan_enabled").default(true).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()
@@ -80,9 +81,36 @@ export const verification = pgTable(
   (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
 
+export const scanSettings = pgTable("scan_settings", {
+  id: text("id").primaryKey().default("default"),
+  qrEnabled: boolean("qr_enabled").default(true).notNull(),
+  faceEnabled: boolean("face_enabled").default(true).notNull(),
+});
+
+export const scanLog = pgTable(
+  "scan_log",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    type: text("type", { enum: ["qr", "face"] }).notNull(),
+    match: boolean("match").notNull(),
+    qrCode: text("qr_code"),
+    faceResult: text("face_result"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("scan_log_userId_idx").on(table.userId),
+    index("scan_log_createdAt_idx").on(table.createdAt),
+    index("scan_log_type_idx").on(table.type),
+  ],
+);
+
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
+  scanLogs: many(scanLog),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -95,6 +123,13 @@ export const sessionRelations = relations(session, ({ one }) => ({
 export const accountRelations = relations(account, ({ one }) => ({
   user: one(user, {
     fields: [account.userId],
+    references: [user.id],
+  }),
+}));
+
+export const scanLogRelations = relations(scanLog, ({ one }) => ({
+  user: one(user, {
+    fields: [scanLog.userId],
     references: [user.id],
   }),
 }));

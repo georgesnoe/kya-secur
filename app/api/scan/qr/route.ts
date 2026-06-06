@@ -1,10 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
+import crypto from "crypto";
 import { db } from "@/lib/db";
-import { user } from "@/lib/schema";
+import { user, scanSettings, scanLog } from "@/lib/schema";
 
 export async function POST(request: NextRequest) {
     try {
+        const faceScanEnabled = await db
+            .select()
+            .from(scanSettings)
+            .where(eq(scanSettings.id, "default"))
+            .limit(1)
+            .then((rows) => (rows[0] ? rows[0].faceEnabled : true));
+
         const body = await request.json();
         const { qrcode } = body;
 
@@ -29,10 +37,21 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        const userScanAllowed = foundUser.scanEnabled ?? true;
+
+        // Log the QR scan attempt
+        await db.insert(scanLog).values({
+            id: crypto.randomUUID(),
+            userId: foundUser.id,
+            type: "qr",
+            match: userScanAllowed,
+            qrCode: qrcode,
+        });
+
         return NextResponse.json({
             success: true,
-            match: true,
-            needFaceScan: true,
+            match: userScanAllowed,
+            needFaceScan: userScanAllowed && faceScanEnabled,
             data: {
                 id: foundUser.id,
                 name: foundUser.name,

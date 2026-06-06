@@ -4,8 +4,11 @@ export async function uploadFaceToBlob(
     file: File | Blob,
     userId: string,
 ): Promise<string> {
-    const blob = await put(`faces/${userId}`, file, {
-        access: "public",
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    const blob = await put(`faces/${userId}`, buffer, {
+        access: "private",
         addRandomSuffix: true,
     });
     return blob.url;

@@ -23,6 +23,18 @@ export default function DashboardLayout({
                     >
                         Users
                     </Link>
+                    <Link
+                        href="/dashboard/scans"
+                        className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                    >
+                        Historique
+                    </Link>
+                    <Link
+                        href="/dashboard/settings"
+                        className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                    >
+                        Paramètres
+                    </Link>
                 </nav>
             </aside>
 
@@ -34,10 +46,10 @@ export default function DashboardLayout({
                         href="/"
                         className="text-sm text-muted-foreground hover:text-foreground"
                     >
-                        ← Back to site
+                        ← Retour au site
                     </Link>
                     <div className="ml-auto text-sm text-muted-foreground">
-                        Admin Dashboard
+                        Tableau de bord
                     </div>
                 </header>
                 <div className="flex-1 p-6 lg:p-8">{children}</div>
