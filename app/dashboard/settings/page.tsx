@@ -23,7 +23,7 @@ export default function SettingsPage() {
     const [saving, setSaving] = useState(false);
 
     useEffect(() => {
-        const fetch = async () => {
+        const loadSettings = async () => {
             try {
                 const res = await fetch(api("/api/settings/scan"));
                 if (!res.ok) throw new Error();
@@ -35,7 +35,7 @@ export default function SettingsPage() {
                 setLoading(false);
             }
         };
-        fetch();
+        loadSettings();
     }, []);
 
     const handleToggle = async (newValue: boolean) => {
